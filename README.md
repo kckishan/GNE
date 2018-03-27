@@ -2,10 +2,10 @@
 
 ## Integrates gene interaction network with gene expression data to learn informative representations for gene network.
 
-![](figures/gne.eps)
+![](figures/gne.pdf)
 
 ## Architecture of GNE
-![](figures/block_diagram.eps)
+![](figures/block_diagram.pdf)
 
 
 Tensorflow implementation of Gene Network Embedding framework (GNE).
