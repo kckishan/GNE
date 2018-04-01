@@ -15,7 +15,8 @@ from sklearn.model_selection import train_test_split
 import pandas as pd
 import networkx as nx
 from numba import jit
-
+import scipy.io as sio
+from scipy.sparse import coo_matrix
 
 def plot_correlation_matrix(corr):
     from matplotlib import pyplot as plt
@@ -249,8 +250,6 @@ def createFeaturesFromEmbedding(emb, gold_standard, method="concatenate"):
     return data, labels
 
 def convertAdjMatrixToSortedRankTSV(inputFile=None, outputFilename=None, desc=True):
-
-
     tbl = inputFile
 
     rownames = range(tbl.shape[0])
@@ -425,3 +424,24 @@ def read_test_link(testlinkfile):
     f.close()
     print("test link number:", len(X_test))
     return X_test
+
+
+def load_network(filename, num_genes):
+    print ("### Loading [%s]..." % (filename))
+    i, j, val = np.loadtxt(filename).T
+    A = coo_matrix((val, (i, j)), shape=(num_genes, num_genes))
+    A = A.todense()
+    A = np.squeeze(np.asarray(A))
+    if A.min() < 0:
+        print ("### Negative entries in the matrix are not allowed!")
+        A[A < 0] = 0
+        print ("### Matrix converted to nonnegative matrix.")
+        print
+    if (A.T == A).all():
+        pass
+    else:
+        print ("### Matrix not symmetric!")
+        A = A + A.T
+        print ("### Matrix converted to symmetric.")
+    A = A - np.diag(np.diag(A))
+    return A

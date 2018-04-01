@@ -23,23 +23,10 @@ def parse_args():
     return parser.parse_args()
 
 
-def run_GNE(path, data, args):
-    t1      = time.time()
-
-    # Execute the model with parsed arguments
-    model   = GNE(  path, data, id_embedding_size=args.id_dim, attr_embedding_size=args.attr_dim, batch_size=args.batch_size, alpha=args.alpha, epoch = args.epoch, representation_size=args.representation_size, learning_rate=args.learning_rate)
-    embeddings = model.train( )
-
-    t2 = time.time()
-    print("Time taken to execute GNE: " + str(t2 - t1))
-
-    return embeddings
-
 if __name__ == '__main__':
-
-    # parse the arguments
+    # # parse the arguments
     args = parse_args()
-
+    #
     # Define the file number associated with organism: yeast or ecoli
     organism = args.organism
 
@@ -51,22 +38,42 @@ if __name__ == '__main__':
     elif args.organism == "yeast":
         organism_id = 4
 
-    test_size = 0.1
-    validation_size = 0.1
-    linkfile = path + "edgelist_biogrid.txt"
-    datafile = path + "net" + str(organism_id) + "_expression_data.tsv"
-    attrfile = path + "data_standard.txt"
 
-    trainlinkfile = path + "edgelist_train.txt"
-    testlinkfile = path + "edgelist_test_" + str(test_size) + ".txt"
+    geneids = pd.read_csv(path + "gene_ids.tsv", sep=" ")
+    num_genes = geneids.shape[0]
+    link_file = path + "edgelist_biogrid.txt"
+    feature_file = './data/ecoli/expression_data.tsv'
 
-    print("Creating test data")
-    create_test_file(path, linkfile, trainlinkfile, testlinkfile, test_size=0.1)
-    X_test = read_test_link(testlinkfile)
+    adj = load_network(link_file, num_genes)
 
-    print("Creating training and validation data")
-    Data = data.LoadData(path, int(validation_size * 2018), validation_size, organism_id)
-    
+    # Perform train-test split
+    # dataset = create_train_test_split(path, adj, test_size=0.1, validation_size=0.1)
+    train_size = 0.9
+    # for train_size in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]:
+    test_split_file = open(path + "split_data_" + str(train_size) + ".pkl", 'rb')
+    dataset = pickle.load(test_split_file)
+    test_split_file.close()
+
+    train_edges = dataset['train_pos']
+    train_edges_false = dataset['train_neg']
+    val_edges = dataset['val_pos']
+    val_edges_false = dataset['val_neg']
+    test_edges = dataset['test_pos']
+    test_edges_false = dataset['test_neg']
+
+    # Inspect train/test split
+    print("Total nodes:", adj.shape[0])
+    print("Total edges:", np.sum(adj))  # adj is symmetric, so nnz (num non-zero) = 2*num_edges
+    print("Training edges (positive):", len(train_edges))
+    print("Training edges (negative):", len(train_edges_false))
+    print("Validation edges (positive):", len(val_edges))
+    print("Validation edges (negative):", len(val_edges_false))
+    print("Test edges (positive):", len(test_edges))
+    print("Test edges (negative):", len(test_edges_false))
+    #
+    Data = data.LoadData(path, train_links=train_edges, features_file=feature_file)
+    #
+    #
     print("Path: ", path)
     print("Total number of nodes: ", Data.id_N)
     print("Total number of attributes: ", Data.attr_M)
@@ -75,18 +82,41 @@ if __name__ == '__main__':
     print('Dimension of Structural Embedding (d):', args.id_dim)
     print('Dimension of Attribute Embedding (d):', args.attr_dim)
     print('Dimension of final representation (d):', args.attr_dim)
+    #
+    # Create validation edges and labels
+    validation_edges = np.concatenate([val_edges, val_edges_false])
+    val_edge_labels = np.concatenate([np.ones(len(val_edges)), np.zeros(len(val_edges_false))])
 
-    # Learn embeddings 
-    embeddings = run_GNE(path, Data, args)
+    for alpha in  [0, 0.2, 0.4, 0.6, 0.8, 1]:
+        model = GNE(path, Data, alpha=alpha)
+        embeddings = model.train(validation_edges, val_edge_labels)
 
-    # Save embeddings 
-    embeddings_file = open("./output/"+args.organism+"/embeddings_evaluation.pkl", 'wb')
-    pickle.dump(embeddings, embeddings_file)
-    embeddings_file.close()
+        # Train-set edge embeddings
+        pos_train_edge_embs = get_edge_embeddings(embeddings, train_edges)
+        neg_train_edge_embs = get_edge_embeddings(embeddings, train_edges_false)
+        train_edge_embs = np.concatenate([pos_train_edge_embs, neg_train_edge_embs])
 
-    # compute similarity between embeddings 
-    cosine_matrix = cosine_similarity(embeddings, embeddings)
+        # Create train-set edge labels: 1 = real edge, 0 = false edge
+        train_edge_labels = np.concatenate([np.ones(len(train_edges)), np.zeros(len(train_edges_false))])
 
-    # Evaluate the prediction on test dataset
-    roc, pr= evaluate_ROC_from_cosine_matrix(X_test, cosine_matrix)
-    print("Accuracy using structure + attribute: {0:.9f}, {1:.9f} ".format( roc, pr))
+        # Test-set edge embeddings, labels
+        pos_test_edge_embs = get_edge_embeddings(embeddings, test_edges)
+        neg_test_edge_embs = get_edge_embeddings(embeddings, test_edges_false)
+        test_edge_embs = np.concatenate([pos_test_edge_embs, neg_test_edge_embs])
+
+        # Create val-set edge labels: 1 = real edge, 0 = false edge
+        test_edge_labels = np.concatenate([np.ones(len(test_edges)), np.zeros(len(test_edges_false))])
+
+        # Train logistic regression classifier on train-set edge embeddings
+        from sklearn.linear_model import LogisticRegression
+
+        edge_classifier = LogisticRegression(random_state=0)
+        edge_classifier.fit(train_edge_embs, train_edge_labels)
+
+        test_preds = edge_classifier.predict_proba(test_edge_embs)[:, 1]
+        test_roc = roc_auc_score(test_edge_labels, test_preds)
+        test_ap = average_precision_score(test_edge_labels, test_preds)
+
+        print("Alpha :", str(alpha))
+        print('GNE Test ROC score: ', str(test_roc))
+        print('GNE Test AP score: ', str(test_ap))

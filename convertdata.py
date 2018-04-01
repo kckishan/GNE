@@ -1,12 +1,14 @@
 import random
 import os
+
+import pickle
 from sklearn.preprocessing import scale
 
 from utils import *
 
 # Create Data Loader
 # Load expression data file of shape E * N where N is number of genes and E is number of experiments
-def load_data(datafile):
+def load_data(datafile, normalize=True):
     """
     This function loads data set
     :param datafile: 
@@ -15,79 +17,43 @@ def load_data(datafile):
     # Load data file
     df = pd.read_csv(datafile, sep='\t', header=0)
     df.columns = [int(x[1:]) - 1 for x in df.columns]
-    df = pd.DataFrame(scale(df, axis=0))
+    if normalize==True:
+        df = pd.DataFrame(scale(df, axis=0))
     t_data = df.T
     return (t_data)
 
-# Function to check if file exists and remove it
-def remove_file(file):
-    if os.path.isfile(file) == True:
-        os.remove(file)
-
-# Create test file from gold standard with defined test size
-def create_test_file(path, link_file, train_file, test_file, test_size=0.1):
-    remove_file(test_file)
-    remove_file(train_file)
-
-    edgelist = pd.read_csv(link_file, sep=" ", header=None)
-
-    # Read the saved negative interactions examples 
-    neg_adj = pd.read_csv(path + "neg_sample.txt", header=None, sep=",")
-    neg_adj.columns = ['A', 'B', 'C']
-
-    # Split link information to train and test with test split size 
-    edgelist = edgelist.sample(frac=1).reset_index(drop=True)
-    x_train, x_test = train_test_split(edgelist, test_size=test_size)
-    neg_adj_0 = neg_adj
-
-    # Sample the negative samples as same number as positive instances in test data
-    n = x_test.shape[0]
-    ind = random.sample(range(len(neg_adj_0)), n)
-
-    # randomize to select random sample
-    neg_adj_0 = pd.DataFrame(np.random.permutation(neg_adj_0))
-    X_test_0 = neg_adj_0.iloc[ind, :]
-
-    # Stack positive and negative interactions
-    X_test = pd.DataFrame(np.vstack((x_test, X_test_0))).astype(int)
-
-    # Save train and test file
-    X_test.to_csv(test_file, header=None, sep=' ', index=False, mode='a')
-    x_train.to_csv(train_file, header=None, sep=' ', index=False, mode='a')
-
-
-def convertdata(path, datafile, original_train_file, train_file, validation_file, test_size=0.1):
+def create_train_test_split(path, adj_matrix, test_size=0.1, validation_size=0.1, save_to_file=True):
     
-    print("converting data from " + path)
-    remove_file(train_file)
-    remove_file(validation_file)
-    remove_file(path + 'data_standard.txt')
-
-    # Normalize expression data
-    data = load_data(datafile)
-    data.to_csv(path + 'data_standard.txt', header=None, sep=' ', mode='a')
-
-    # Read edge information
-    edgelist = pd.read_csv(path + original_train_file, sep=" ", header=None)
-
-    # Read negative samples
-    neg_adj = pd.read_csv(path + "neg_sample.txt", header = None, sep=",")
-    neg_adj.columns = ['A', 'B', 'C']
+    print("Creating train test and validation_split")
 
     # Split link information to train and validation with test split size 
-    edgelist = edgelist.sample(frac=1).reset_index(drop=True)
-    x_train, x_validation = train_test_split(edgelist, test_size=test_size)
-    neg_adj_0 = neg_adj
+    edgelist = convertAdjMatrixToSortedRankTSV(adj_matrix)
+    pos_edges = np.array(edgelist.loc[edgelist.iloc[:, 2] == 1])
 
-    # randomize to select random sample
-    n = x_validation.shape[0]
-    ind = random.sample(range(len(neg_adj_0)), n)
-    neg_adj_0 = pd.DataFrame(np.random.permutation(neg_adj_0))
-    x_validation_0 = neg_adj_0.iloc[ind, :]
+    neg_edgelist = np.array(edgelist.loc[edgelist.iloc[:, 2] == 0])
+    ind = random.sample(range(len(neg_edgelist)), len(pos_edges))
+    neg_edges = pd.DataFrame(np.random.permutation(neg_edgelist))
+    neg_edges = neg_edges.iloc[ind, :]
 
-    # Stack positive and negative interactions
-    X_validation = pd.DataFrame(np.vstack((x_validation, x_validation_0))).astype(int)
+    X_pos, test_edges = train_test_split(pos_edges, test_size=test_size)
+    X_neg, test_edges_false = train_test_split(neg_edges, test_size=test_size)
 
-    # Save train and test file
-    X_validation.to_csv(validation_file, header=None, sep=' ', index=False, mode='a')
-    x_train.to_csv(train_file, header=None, sep=' ', index=False, mode='a')
+
+    print(test_size)
+    train_edges, val_edges = train_test_split(X_pos, test_size=validation_size)
+    train_edges_false, val_edges_false = train_test_split(X_neg, test_size=validation_size)
+
+    dataset = {}
+    dataset['train_pos'] = train_edges
+    dataset['train_neg'] = train_edges_false
+    dataset['val_pos'] = val_edges
+    dataset['val_neg'] = val_edges_false
+    dataset['test_pos'] = test_edges
+    dataset['test_neg'] = test_edges_false
+
+    if save_to_file:
+        test_split_file = open( path + "/split_data_"+str(1.0-validation_size)+".pkl", 'wb')
+        pickle.dump(dataset, test_split_file)
+        test_split_file.close()
+
+    return dataset

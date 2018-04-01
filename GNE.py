@@ -12,12 +12,13 @@ import os
 import numpy as np
 import tensorflow as tf
 from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.metrics.pairwise import cosine_similarity, euclidean_distances
 from tensorflow.contrib import rnn
 
 import evaluation
 
 class GNE(BaseEstimator, TransformerMixin):
-    def __init__(self, path, data, id_embedding_size, attr_embedding_size, batch_size=128, alpha = 1, n_neg_samples=10,
+    def __init__(self, path, data, id_embedding_size = 128, attr_embedding_size = 128, batch_size=128, alpha = 1, n_neg_samples=10,
                 epoch=20, random_seed = 2018, representation_size = 128, learning_rate = 0.001):
         # bind params to class
         # bind data to class
@@ -27,7 +28,6 @@ class GNE(BaseEstimator, TransformerMixin):
         self.node_N                 = data.id_N
         self.attr_M                 = data.attr_M
         self.X_train                = data.X
-        self.X_validation           = data.X_validation
         
         # bind model parameters to class
         self.id_embedding_size      = id_embedding_size
@@ -121,7 +121,7 @@ class GNE(BaseEstimator, TransformerMixin):
         return loss
 
 
-    def train(self): # fit a dataset
+    def train(self, validation_edges, validation_labels): # fit a dataset
 
         # Number of iterations executed
         total_iterations = 0
@@ -174,7 +174,8 @@ class GNE(BaseEstimator, TransformerMixin):
             Embeddings      = Embeddings_out + Embeddings_in
 
              # link prediction test
-            roc, pr = evaluation.evaluate_ROC(self.X_validation, Embeddings)
+            distance_matrix = -1*euclidean_distances(Embeddings, Embeddings)
+            roc, pr = evaluation.evaluate_ROC_from_matrix(validation_edges, validation_labels, distance_matrix)
             
             # If validation accuracy is an improvement over best-known.
             if roc > best_validation_accuracy:

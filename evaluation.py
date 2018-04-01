@@ -46,9 +46,8 @@ def evaluate_ROC(X_test, Embeddings):
     return roc, pr
 
 # Evaluate ROC using predicted cosine matrix 
-def evaluate_ROC_from_cosine_matrix(X_test, cosine_matrix):
-    y_true = [ X_test[i][2] for i in range(len(X_test))]
-    y_predict = [cosine_matrix[X_test[i][0], X_test[i][1]]  for i in range(len(X_test))]
+def evaluate_ROC_from_matrix(X_edges, y_true, matrix):
+    y_predict = [matrix[int(edge[0]), int(edge[1])]  for edge in X_edges]
     roc = roc_auc_score(y_true, y_predict)
     if roc < 0.5:
         roc = 1 - roc
@@ -118,3 +117,27 @@ def read_test_link(testlinkfile):
         line = f.readline()
     f.close()
     return X_test
+
+
+def get_edge_embeddings(Embeddings, edge_list):
+        embs = []
+        for edge in edge_list:
+            node1 = int(edge[0])
+            node2 = int(edge[1])
+            emb1 = Embeddings[node1]
+            emb2 = Embeddings[node2]
+            edge_emb = np.multiply(emb1, emb2)
+            embs.append(edge_emb)
+        embs = np.array(embs)
+        return embs
+
+def evaluationClassifier(pos_edges, neg_edges):
+    from sklearn.linear_model import LogisticRegression
+
+    pos_val_edge_embs = get_edge_embeddings(pos_edges)
+    neg_val_edge_embs = get_edge_embeddings(neg_edges)
+    val_edge_embs = np.concatenate([pos_val_edge_embs, neg_val_edge_embs])
+    val_edge_labels = np.concatenate([np.ones(len(pos_edges)), np.zeros(len(neg_edges))])
+
+    edge_classifier = LogisticRegression(random_state=0)
+    edge_classifier.fit(val_edge_embs, val_edge_labels)
