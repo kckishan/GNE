@@ -54,38 +54,36 @@ def create_train_test_split(path, adj, test_size=0.1, validation_size=0.1, save_
     X_pos, test_edges = train_test_split(pos_edges.values, test_size=test_size)
     X_neg, test_edges_false = train_test_split(neg_edges.values, test_size=test_size)
 
-    for validation_size in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]:
-        print(validation_size)
-        train_edges, val_edges = train_test_split(X_pos, test_size=validation_size)
-        train_edges_false, val_edges_false = train_test_split(X_neg, test_size=validation_size)
+    train_edges, val_edges = train_test_split(X_pos, test_size=validation_size)
+    train_edges_false, val_edges_false = train_test_split(X_neg, test_size=validation_size)
 
 
-        assert set(map(tuple, test_edges_false)).isdisjoint(set(map(tuple, train_edges)))
-        assert set(map(tuple, val_edges_false)).isdisjoint(set(map(tuple, train_edges)))
-        assert set(map(tuple, train_edges_false)).isdisjoint(set(map(tuple, train_edges)))
+    assert set(map(tuple, test_edges_false)).isdisjoint(set(map(tuple, train_edges)))
+    assert set(map(tuple, val_edges_false)).isdisjoint(set(map(tuple, train_edges)))
+    assert set(map(tuple, train_edges_false)).isdisjoint(set(map(tuple, train_edges)))
 
-        # assert: test, val, train false edges disjoint
-        assert set(map(tuple, test_edges_false)).isdisjoint(set(map(tuple, val_edges_false)))
-        assert set(map(tuple, test_edges_false)).isdisjoint(set(map(tuple, train_edges_false)))
-        assert set(map(tuple, val_edges_false)).isdisjoint(set(map(tuple, train_edges_false)))
+    # assert: test, val, train false edges disjoint
+    assert set(map(tuple, test_edges_false)).isdisjoint(set(map(tuple, val_edges_false)))
+    assert set(map(tuple, test_edges_false)).isdisjoint(set(map(tuple, train_edges_false)))
+    assert set(map(tuple, val_edges_false)).isdisjoint(set(map(tuple, train_edges_false)))
 
-        # assert: test, val, train positive edges disjoint
-        assert set(map(tuple, val_edges)).isdisjoint(set(map(tuple, train_edges)))
-        assert set(map(tuple, test_edges)).isdisjoint(set(map(tuple, train_edges)))
-        assert set(map(tuple, val_edges)).isdisjoint(set(map(tuple, test_edges)))
+    # assert: test, val, train positive edges disjoint
+    assert set(map(tuple, val_edges)).isdisjoint(set(map(tuple, train_edges)))
+    assert set(map(tuple, test_edges)).isdisjoint(set(map(tuple, train_edges)))
+    assert set(map(tuple, val_edges)).isdisjoint(set(map(tuple, test_edges)))
 
-        dataset = {}
-        dataset['train_pos'] = train_edges
-        dataset['train_neg'] = train_edges_false
-        dataset['val_pos'] = val_edges
-        dataset['val_neg'] = val_edges_false
-        dataset['test_pos'] = test_edges
-        dataset['test_neg'] = test_edges_false
+    dataset = {}
+    dataset['train_pos'] = train_edges
+    dataset['train_neg'] = train_edges_false
+    dataset['val_pos'] = val_edges
+    dataset['val_neg'] = val_edges_false
+    dataset['test_pos'] = test_edges
+    dataset['test_neg'] = test_edges_false
 
-        if save_to_file:
-            test_split_file = open( path + "/split_data_"+str(round(1.0-validation_size, 2))+".pkl", 'wb')
-            pickle.dump(dataset, test_split_file)
-            test_split_file.close()
+    if save_to_file:
+        test_split_file = open( path + "/split_data_"+str(round(1.0-validation_size, 2))+".pkl", 'wb')
+        pickle.dump(dataset, test_split_file)
+        test_split_file.close()
     return dataset
 
 
