@@ -18,8 +18,7 @@ from tensorflow.contrib import rnn
 import evaluation
 
 class GNE(BaseEstimator, TransformerMixin):
-    def __init__(self, path, data, id_embedding_size = 128, attr_embedding_size = 128, batch_size=128, alpha = 1, n_neg_samples=10,
-                epoch=20, random_seed = 2018, representation_size = 128, learning_rate = 0.001):
+    def __init__(self, path, data, random_seed = 2018, parameters=None):
         # bind params to class
         # bind data to class
         self.path                   = path
@@ -30,22 +29,19 @@ class GNE(BaseEstimator, TransformerMixin):
         self.X_train                = data.X
         
         # bind model parameters to class
-        self.id_embedding_size      = id_embedding_size
-        self.attr_embedding_size    = attr_embedding_size
-        self.batch_size             = batch_size
-        self.alpha                  = alpha
-        self.n_neg_samples          = n_neg_samples
-        self.epoch                  = epoch
+        self.id_embedding_size      = parameters['id_embedding_size']
+        self.attr_embedding_size    = parameters['attr_embedding_size']
+        self.batch_size             = parameters['batch_size']
+        self.alpha                  = parameters['alpha']
+        self.n_neg_samples          = parameters['n_neg_samples']
+        self.epoch                  = parameters['epoch']
         self.random_seed            = random_seed
-        self.learning_rate          = learning_rate
-        self.representation_size    = representation_size
+        self.learning_rate          = parameters['learning_rate']
+        self.representation_size    = parameters['representation_size']
 
         # init all variables in a tensorflow graph
         self._init_graph()
-        print("For threshold ", self.alpha)
-        print("For Batch Size ", self.batch_size)
-        print("For negative samples ", self.n_neg_samples)
-
+        print(parameters)
 
     def _init_graph(self):
         '''
@@ -78,10 +74,11 @@ class GNE(BaseEstimator, TransformerMixin):
             self.embed_layer = tf.concat([self.id_embed, self.alpha * self.attr_embed], 1)
 
             # Non-linear transformation of concatenated representation
-            self.representation_layer = tf.nn.tanh(tf.matmul(self.embed_layer, self.weights['hidden_weights']))
+            self.representation_layer_dropout = tf.nn.dropout(self.embed_layer, self.keep_prob)
+            self.representation_layer = tf.nn.tanh(tf.matmul(self.representation_layer_dropout, self.weights['hidden_weights']))
 
             # Compute the loss, using a sample of the negative labels each time.
-            self.loss = tf.reduce_mean( tf.nn.sampled_softmax_loss(self.weights['out_embeddings'], self.weights['biases'], self.train_labels, self.representation_layer, self.n_neg_samples, self.node_N))
+            self.loss = tf.reduce_mean(tf.nn.sampled_softmax_loss(self.weights['out_embeddings'], self.weights['biases'], self.train_labels, self.representation_layer, self.n_neg_samples, self.node_N))
 
             # Adam Optimizer.
             self.optimizer = tf.train.AdamOptimizer(learning_rate=self.learning_rate, beta1=0.9, beta2=0.999, epsilon=1e-8).minimize(self.loss)

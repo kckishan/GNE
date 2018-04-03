@@ -432,16 +432,5 @@ def load_network(filename, num_genes):
     A = coo_matrix((val, (i, j)), shape=(num_genes, num_genes))
     A = A.todense()
     A = np.squeeze(np.asarray(A))
-    if A.min() < 0:
-        print ("### Negative entries in the matrix are not allowed!")
-        A[A < 0] = 0
-        print ("### Matrix converted to nonnegative matrix.")
-        print
-    if (A.T == A).all():
-        pass
-    else:
-        print ("### Matrix not symmetric!")
-        A = A + A.T
-        print ("### Matrix converted to symmetric.")
     A = A - np.diag(np.diag(A))
     return A

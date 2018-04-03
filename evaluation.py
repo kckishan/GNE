@@ -2,6 +2,7 @@ import numpy as np
 import math
 import multiprocessing
 import scipy
+from numba import jit
 
 from sklearn.metrics import average_precision_score, roc_auc_score
 from sklearn.metrics.pairwise import euclidean_distances
@@ -118,10 +119,11 @@ def read_test_link(testlinkfile):
     f.close()
     return X_test
 
-
+@jit
 def get_edge_embeddings(Embeddings, edge_list):
         embs = []
-        for edge in edge_list:
+        for i in range(len(edge_list)):
+            edge = np.array(edge_list)[i, :]
             node1 = int(edge[0])
             node2 = int(edge[1])
             emb1 = Embeddings[node1]
@@ -130,14 +132,3 @@ def get_edge_embeddings(Embeddings, edge_list):
             embs.append(edge_emb)
         embs = np.array(embs)
         return embs
-
-def evaluationClassifier(pos_edges, neg_edges):
-    from sklearn.linear_model import LogisticRegression
-
-    pos_val_edge_embs = get_edge_embeddings(pos_edges)
-    neg_val_edge_embs = get_edge_embeddings(neg_edges)
-    val_edge_embs = np.concatenate([pos_val_edge_embs, neg_val_edge_embs])
-    val_edge_labels = np.concatenate([np.ones(len(pos_edges)), np.zeros(len(neg_edges))])
-
-    edge_classifier = LogisticRegression(random_state=0)
-    edge_classifier.fit(val_edge_embs, val_edge_labels)
