@@ -1,5 +1,3 @@
-import argparse
-import time
 import pickle
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.linear_model import LogisticRegression
@@ -18,8 +16,8 @@ parameters['alpha'] = 1
 parameters['n_neg_samples'] = 10
 parameters['epoch'] = 20
 parameters['representation_size'] = 128
-parameters['batch_size'] = 256
-parameters['learning_rate'] = 0.005
+parameters['batch_size'] = 128
+parameters['learning_rate'] = 0.002
 
 print(parameters)
 
@@ -76,11 +74,10 @@ val_edge_labels = np.concatenate([np.ones(len(val_edges)), np.zeros(len(val_edge
 test_edges_data = np.concatenate([test_edges, test_edges_false])
 test_edge_labels = np.concatenate([np.ones(len(test_edges)), np.zeros(len(test_edges_false))])
 
-for alpha in  [0, 0.2, 0.4, 0.6, 0.8, 1]:
+for alpha in  [0,  0.2, 0.4, 0.6, 0.8, 1]:
     parameters['alpha'] = alpha
     model = GNE(path, Data, 2018, parameters)
-    embeddings = model.train(validation_edges, val_edge_labels)
-
+    embeddings, _ = model.train(validation_edges, val_edge_labels)
     # Train-set edge embeddings
     pos_train_edge_embs = get_edge_embeddings(embeddings, train_edges)
     neg_train_edge_embs = get_edge_embeddings(embeddings, train_edges_false)

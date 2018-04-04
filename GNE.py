@@ -173,7 +173,8 @@ class GNE(BaseEstimator, TransformerMixin):
              # link prediction test
             adj_matrix_rec = np.dot(Embeddings, Embeddings.T)
             roc, pr = evaluation.evaluate_ROC_from_matrix(validation_edges, validation_labels, adj_matrix_rec)
-            
+
+            attr_embeddings = self.getEmbedding('attribute', self.nodes)
             # If validation accuracy is an improvement over best-known.
             if roc > best_validation_accuracy:
                 # Update the best-known validation accuracy.
@@ -183,7 +184,8 @@ class GNE(BaseEstimator, TransformerMixin):
                 last_improvement = total_iterations
 
                 # Save all variables of the TensorFlow graph to file.
-                self.embedding_checkpoints(Embeddings, "save")
+                self.embedding_checkpoints(Embeddings, "save", "all")
+                self.embedding_checkpoints(attr_embeddings, "save", "attribute")
 
                 # A string to be printed below, shows improvement found.
                 improved_str = '*'
@@ -202,29 +204,29 @@ class GNE(BaseEstimator, TransformerMixin):
                 # Break out from the for-loop.
                 break
 
-        Embeddings = self.embedding_checkpoints(Embeddings, "restore")
-        return Embeddings 
+        Embeddings = self.embedding_checkpoints(Embeddings, "restore", "all")
+        attr_embeddings  = self.embedding_checkpoints(attr_embeddings, "restore", "attribute")
+        return Embeddings, attr_embeddings
 
     def getEmbedding(self, type, nodes):
         # get the embedding
         if type == 'embed_layer':
-            feed_dict = {self.train_data_id: nodes['node_id'], self.train_data_attr: nodes['node_attr'], self.keep_prob : 1}
+            feed_dict = {self.train_data_id: nodes['node_id'], self.train_data_attr: nodes['node_attr'],
+                         self.keep_prob: 1}
             Embedding = self.sess.run(self.representation_layer, feed_dict=feed_dict)
             return Embedding
         if type == 'out_embedding':
             Embedding = self.sess.run(self.weights['out_embeddings'])
-            return Embedding  
+            return Embedding
         if type == 'attribute':
-            feed_dict = {self.train_data_id: nodes['node_id'], self.train_data_attr: nodes['node_attr'],
-                         self.keep_prob: 1}
-            Embedding = self.sess.run(self.attr_embed, feed_dict=feed_dict)
-            return Embedding  
+            Embedding = self.sess.run(self.weights['attr_embeddings'])
+            return Embedding
         if type == 'structure':
             Embedding = self.sess.run(self.weights['in_embeddings'])
             return Embedding
 
-    def embedding_checkpoints(self, Embeddings, type):
-        file = self.path + "Embeddings.txt"
+    def embedding_checkpoints(self, Embeddings, type, embedding_type="all"):
+        file = self.path + "Embeddings_"+embedding_type+".txt"
         if type == "save":
             if os.path.isfile(file):
                 os.remove(file)
