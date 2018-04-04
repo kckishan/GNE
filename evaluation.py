@@ -1,13 +1,6 @@
 import numpy as np
-import math
-import multiprocessing
-import scipy
 from numba import jit
-
 from sklearn.metrics import average_precision_score, roc_auc_score
-from sklearn.metrics.pairwise import euclidean_distances
-from sklearn.metrics.pairwise import cosine_similarity
-from joblib import Parallel, delayed
 
 def sigmoid(x):
     return 1 / (1 + np.exp(-x))

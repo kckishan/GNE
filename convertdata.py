@@ -1,11 +1,8 @@
 import random
-import os
 import scipy.sparse as sp
 
 import pickle
 from sklearn.preprocessing import scale
-
-from preprocessing import sparse_to_tuple
 from utils import *
 
 # Create Data Loader

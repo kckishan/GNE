@@ -6,15 +6,11 @@ Tensorflow implementation of Gene Network Embedding framework (GNE)
 '''
 
 import pandas as pd
-import math
 import random
 import os
 import numpy as np
 import tensorflow as tf
 from sklearn.base import BaseEstimator, TransformerMixin
-from sklearn.metrics.pairwise import cosine_similarity, euclidean_distances
-from tensorflow.contrib import rnn
-
 import evaluation
 
 class GNE(BaseEstimator, TransformerMixin):

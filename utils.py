@@ -15,7 +15,6 @@ from sklearn.model_selection import train_test_split
 import pandas as pd
 import networkx as nx
 from numba import jit
-import scipy.io as sio
 from scipy.sparse import coo_matrix
 
 def plot_correlation_matrix(corr):
