@@ -1,5 +1,3 @@
-from sklearn.preprocessing import MinMaxScaler
-
 from convertdata import *
 from numba import jit
 import os
@@ -24,9 +22,9 @@ class LoadData( object ):
         self.datafile = features_file
         self.attrfile = self.path + "data_standard.txt"
         os.remove(self.attrfile)
+
         # Load expression data
         data = load_data(self.datafile, normalize_features)
-
         data.to_csv(self.attrfile, header=None, sep=' ', mode='a')
 
         # Split train file to train and validation
