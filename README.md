@@ -21,7 +21,7 @@ Tensorflow implementation of Gene Network Embedding framework (GNE).
 
 ### Example to run the codes.
 ```
-python GNE_runner.py
+python run_GNE.py
 ```
 
 ## Contact
