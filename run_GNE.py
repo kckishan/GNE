@@ -5,6 +5,7 @@ from evaluation import *
 from GNE import GNE
 from convertdata import *
 
+################################# Define parameters to train GNE model #######################################
 parameters = {}
 parameters['id_embedding_size'] = 128
 parameters['attr_embedding_size'] = 128
@@ -17,9 +18,12 @@ parameters['learning_rate'] = 0.005
 
 print(parameters)
 
+################################################################################################################
+
+
+#################################### Define dataset and files ##################################################
 # Define dataset to run the model: yeast or ecoli
 organism = 'yeast'
-
 # Define path
 path = './data/' + organism +'/'
 
@@ -29,6 +33,11 @@ num_genes = geneids.shape[0]
 # Define the input to GNE model
 link_file = path + "edgelist_biogrid.txt"
 feature_file = path + 'expression_data.tsv'
+
+################################################################################################################
+
+
+################################# Load network and split to train and test######################################
 
 adj = load_network(link_file, num_genes)
 
@@ -51,9 +60,10 @@ print("Validation interactions (negative):", len(val_edges_false))
 print("Test interactions (positive):", len(test_edges))
 print("Test interactions (negative):", len(test_edges_false))
 
-# load dataset to fit GNE model
-Data = data.LoadData(path, train_links=train_edges, features_file=feature_file)
+################################################################################################################
 
+
+###################### Combine positive and negative interactions for valdiation and test ######################
 # Create validation edges and labels
 validation_edges = np.concatenate([val_edges, val_edges_false])
 val_edge_labels = np.concatenate([np.ones(len(val_edges)), np.zeros(len(val_edges_false))])
@@ -62,12 +72,23 @@ val_edge_labels = np.concatenate([np.ones(len(val_edges)), np.zeros(len(val_edge
 test_edges_data = np.concatenate([test_edges, test_edges_false])
 test_edge_labels = np.concatenate([np.ones(len(test_edges)), np.zeros(len(test_edges_false))])
 
+################################################################################################################
+
+
+################## load interaction and expression data to fit GNE model and learn embeddings ##################
+# load dataset to fit GNE model
+Data = data.LoadData(path, train_links=train_edges, features_file=feature_file)
+
 # Define GNE model with data and parameters
 model = GNE(path, Data, 2018, parameters)
 
 # learn embeddings
 embeddings, attr_embeddings = model.train(validation_edges, val_edge_labels)
 
+################################################################################################################
+
+
+################## Create feature matrix and true labels for training and randomize the rows  ##################
 # Train-set edge embeddings
 pos_train_edge_embs = get_edge_embeddings(embeddings, train_edges)
 neg_train_edge_embs = get_edge_embeddings(embeddings, train_edges_false)
@@ -81,6 +102,10 @@ index = np.random.permutation([i for i in range(len(train_edge_labels))])
 train_data = train_edge_embs[index, :]
 train_labels = train_edge_labels[index]
 
+################################################################################################################
+
+
+################## Train the logistic regression on training data and predict on test dataset ##################
 # Train logistic regression on train-set edge embeddings
 edge_classifier = LogisticRegression(random_state=0)
 edge_classifier.fit(train_data, train_labels)
@@ -103,7 +128,13 @@ test_ap = average_precision_score(test_labels, test_preds)
 msg = "Alpha: {0:>6}, GNE Test ROC Score: {1:.9f}, GNE Test AP score: {2:.9f}"
 print(msg.format(parameters['alpha'], test_roc, test_ap))
 
-# Save the embedding to a file
+################################################################################################################
+
+
+########################################## Save the embedding to a file ########################################
+
 embeddings_file = open(path + "embeddings_trainsize_alpha_"+str(parameters['alpha'])+".pkl", 'wb')
 pickle.dump(embeddings, embeddings_file)
 embeddings_file.close()
+
+################################################################################################################
