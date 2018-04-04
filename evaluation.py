@@ -1,5 +1,6 @@
 import numpy as np
 from numba import jit
+
 from sklearn.metrics import average_precision_score, roc_auc_score
 
 def sigmoid(x):
@@ -56,18 +57,6 @@ def load_datafile(data_file, N):
             break
     f.close()
     return data
-
-# Read the test links to create a list 
-def read_test_link(testlinkfile):
-    X_test = []
-    f = open(testlinkfile)
-    line = f.readline()
-    while line:
-        line = line.strip().split(' ')
-        X_test.append([int(line[0]), int(line[1]), int(line[2])])
-        line = f.readline()
-    f.close()
-    return X_test
 
 @jit
 def get_edge_embeddings(Embeddings, edge_list):

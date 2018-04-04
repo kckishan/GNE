@@ -23,7 +23,7 @@ def load_data(datafile, normalize=True):
 
 def create_train_test_split(path, adj, test_size=0.1, validation_size=0.1, save_to_file=True):
     
-    print("Creating train test and validation_split")
+    print("Creating train test and validation split")
     g = nx.Graph(adj)
     adj = nx.to_scipy_sparse_matrix(g)
 

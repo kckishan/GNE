@@ -25,6 +25,8 @@ path = './data/' + organism +'/'
 
 geneids = pd.read_csv(path + "gene_ids.tsv", sep=" ")
 num_genes = geneids.shape[0]
+
+# Define the input to GNE model
 link_file = path + "edgelist_biogrid.txt"
 feature_file = path + 'expression_data.tsv'
 
@@ -50,17 +52,8 @@ print("Validation edges (negative):", len(val_edges_false))
 print("Test edges (positive):", len(test_edges))
 print("Test edges (negative):", len(test_edges_false))
 
+# load dataset to fit GNE model
 Data = data.LoadData(path, train_links=train_edges, features_file=feature_file)
-
-# Details for dataset for GNE model to train
-print("Path: ", path)
-print("Total number of nodes: ", Data.id_N)
-print("Total number of attributes: ", Data.attr_M)
-print("Total training links: ", len(Data.links))
-print("Total epoch: ", parameters['epoch'])
-print('Dimension of structural Embedding (d):', parameters['id_embedding_size'])
-print('Dimension of attribute Embedding (d):', parameters['attr_embedding_size'])
-print('Dimension of final representation (d):', parameters['representation_size'])
 
 # Create validation edges and labels
 validation_edges = np.concatenate([val_edges, val_edges_false])
@@ -70,47 +63,48 @@ val_edge_labels = np.concatenate([np.ones(len(val_edges)), np.zeros(len(val_edge
 test_edges_data = np.concatenate([test_edges, test_edges_false])
 test_edge_labels = np.concatenate([np.ones(len(test_edges)), np.zeros(len(test_edges_false))])
 
-for alpha in  [0, 0.2, 0.4, 0.6, 0.8, 1]:
-    parameters['alpha'] = alpha
-    model = GNE(path, Data, 2018, parameters)
-    embeddings, _ = model.train(validation_edges, val_edge_labels)
-    # Train-set edge embeddings
-    pos_train_edge_embs = get_edge_embeddings(embeddings, train_edges)
-    neg_train_edge_embs = get_edge_embeddings(embeddings, train_edges_false)
-    train_edge_embs = np.concatenate([pos_train_edge_embs, neg_train_edge_embs])
+# Define GNE model with data and parameters
+model = GNE(path, Data, 2018, parameters)
 
-    # Create train-set edge labels: 1 = real edge, 0 = false edge
-    train_edge_labels = np.concatenate([np.ones(len(train_edges)), np.zeros(len(train_edges_false))])
+# learn embeddings
+embeddings, attr_embeddings = model.train(validation_edges, val_edge_labels)
 
-    # Randomize train edges and labels
-    index = np.random.permutation([i for i in range(len(train_edge_labels))])
-    train_data = train_edge_embs[index, :]
-    train_labels = train_edge_labels[index]
+# Train-set edge embeddings
+pos_train_edge_embs = get_edge_embeddings(embeddings, train_edges)
+neg_train_edge_embs = get_edge_embeddings(embeddings, train_edges_false)
+train_edge_embs = np.concatenate([pos_train_edge_embs, neg_train_edge_embs])
 
-    # Test-set edge embeddings, labels
-    pos_test_edge_embs = get_edge_embeddings(embeddings, test_edges)
-    neg_test_edge_embs = get_edge_embeddings(embeddings, test_edges_false)
-    test_edge_embs = np.concatenate([pos_test_edge_embs, neg_test_edge_embs])
+# Create train-set edge labels: 1 = real edge, 0 = false edge
+train_edge_labels = np.concatenate([np.ones(len(train_edges)), np.zeros(len(train_edges_false))])
 
-    # Train logistic regression classifier on train-set edge embeddings
-    edge_classifier = LogisticRegression(random_state=0)
-    edge_classifier.fit(train_data, train_labels)
+# Randomize train edges and labels
+index = np.random.permutation([i for i in range(len(train_edge_labels))])
+train_data = train_edge_embs[index, :]
+train_labels = train_edge_labels[index]
 
-    # Randomize test edges and labels
-    index = np.random.permutation([i for i in range(len(test_edge_labels))])
-    test_data = test_edge_embs[index, :]
-    test_labels = test_edge_labels[index]
+# Train logistic regression on train-set edge embeddings
+edge_classifier = LogisticRegression(random_state=0)
+edge_classifier.fit(train_data, train_labels)
 
-    # Predict the probabilty for test edges by trained classifier
-    test_preds = edge_classifier.predict_proba(test_data)[:, 1]
-    test_roc = roc_auc_score(test_labels, test_preds)
-    test_ap = average_precision_score(test_labels, test_preds)
+# Test-set edge embeddings, labels
+pos_test_edge_embs = get_edge_embeddings(embeddings, test_edges)
+neg_test_edge_embs = get_edge_embeddings(embeddings, test_edges_false)
+test_edge_embs = np.concatenate([pos_test_edge_embs, neg_test_edge_embs])
 
-    # link prediction test
-    msg = "Alpha: {0:>6}, GNE Test ROC Score: {1:.9f}, GNE Test AP score: {2:.9f}"
-    print(msg.format(alpha, test_roc, test_ap))
+# Randomize test edges and labels
+index = np.random.permutation([i for i in range(len(test_edge_labels))])
+test_data = test_edge_embs[index, :]
+test_labels = test_edge_labels[index]
 
-    # Save the embedding to a file
-    embeddings_file = open(path + "embeddings_trainsize_alpha_"+str(alpha)+".pkl", 'wb')
-    pickle.dump(embeddings, embeddings_file)
-    embeddings_file.close()
+# Predict the probabilty for test edges by trained classifier
+test_preds = edge_classifier.predict_proba(test_data)[:, 1]
+test_roc = roc_auc_score(test_labels, test_preds)
+test_ap = average_precision_score(test_labels, test_preds)
+
+msg = "Alpha: {0:>6}, GNE Test ROC Score: {1:.9f}, GNE Test AP score: {2:.9f}"
+print(msg.format(parameters['alpha'], test_roc, test_ap))
+
+# Save the embedding to a file
+embeddings_file = open(path + "embeddings_trainsize_alpha_"+str(parameters['alpha'])+".pkl", 'wb')
+pickle.dump(embeddings, embeddings_file)
+embeddings_file.close()

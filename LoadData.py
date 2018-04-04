@@ -35,17 +35,9 @@ class LoadData( object ):
         self.X = {}
 
         self.node_neighbors_map = {} # [nodeid: neighbors_set] each node id maps to its neighbors set
-
-        print("Constructing Nodes")
         self.construct_nodes()
-
-        print("Reading training links")
         self.read_link()
-
-        print("Constructing Neighborhood maps")
         self.construct_node_neighbors_map()
-
-        print("Constructing train data")
         self.construct_X()
 
     def readExp(self):
@@ -53,7 +45,7 @@ class LoadData( object ):
         line = f.readline()
         items = line.strip().split(' ')
         self.attr_M = len(items[1:])
-        print("attr_M:", self.attr_M)
+        print("Dimension of attributes:", self.attr_M)
 
     def construct_nodes(self):
         '''construct the dictionary '''
@@ -72,7 +64,7 @@ class LoadData( object ):
             line = f.readline()
         f.close()
         self.id_N = i
-        print("id_N:", self.id_N)
+        print("Number of genes:", self.id_N)
 
     @jit
     def construct_X(self):
@@ -95,6 +87,8 @@ class LoadData( object ):
 
     def read_link(self):  # read link file to a list of links
         self.links = []
+        if self.undirected:
+            print("Making adjacency matrix symmetric since the graph is undirected.")
         for edge in self.train_links:
             link = [int(edge[0]), int(edge[1])]
             self.links.append(link)
