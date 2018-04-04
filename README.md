@@ -8,6 +8,12 @@
 ![](figures/block_diagram.png)
 
 
+Datasets
+| Dataset        | Source           | 
+| ------------- |:-------------:|
+| Interaction dataset  | [BioGRID](http://thebiogrid.org/) | 
+| Gene expression data     | [DREAM5 Challenge](http://dreamchallenges.org/project/dream-5-network-inference-challenge/)    |  
+
 Tensorflow implementation of Gene Network Embedding framework (GNE).
 
 ## Example to run the codes.
