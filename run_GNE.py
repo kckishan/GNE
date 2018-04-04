@@ -43,14 +43,13 @@ test_edges = dataset['test_pos']
 test_edges_false = dataset['test_neg']
 
 # Inspect train/test split
-print("Total nodes:", adj.shape[0])
-print("Total edges:", np.sum(adj))  # adj is symmetric, so nnz (num non-zero) = 2*num_edges
-print("Training edges (positive):", len(train_edges))
-print("Training edges (negative):", len(train_edges_false))
-print("Validation edges (positive):", len(val_edges))
-print("Validation edges (negative):", len(val_edges_false))
-print("Test edges (positive):", len(test_edges))
-print("Test edges (negative):", len(test_edges_false))
+print("Total genes:", adj.shape[0])
+print("Training interactions (positive):", len(train_edges))
+print("Training interactions (negative):", len(train_edges_false))
+print("Validation interactions (positive):", len(val_edges))
+print("Validation interactions (negative):", len(val_edges_false))
+print("Test interactions (positive):", len(test_edges))
+print("Test interactions (negative):", len(test_edges_false))
 
 # load dataset to fit GNE model
 Data = data.LoadData(path, train_links=train_edges, features_file=feature_file)
