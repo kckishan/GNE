@@ -115,9 +115,9 @@ for alpha in  [0, 0.2, 0.4, 0.6, 0.8, 1]:
 
     # link prediction test
     msg = "Alpha: {0:>6}, GNE Test ROC Score: {1:.9f}, GNE Test AP score: {2:.9f}"
-    print(msg.format(Alpha, test_roc, test_ap))
+    print(msg.format(alpha, test_roc, test_ap))
 
     # Save the embedding to a file
-    embeddings_file = open(path + "embeddings_trainsize_" + str(train_size) + "_alpha_"+str(alpha)+".pkl", 'wb')
+    embeddings_file = open(path + "embeddings_trainsize_alpha_"+str(alpha)+".pkl", 'wb')
     pickle.dump(embeddings, embeddings_file)
     embeddings_file.close()

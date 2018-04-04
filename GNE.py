@@ -171,8 +171,8 @@ class GNE(BaseEstimator, TransformerMixin):
             Embeddings      = Embeddings_out + Embeddings_in
 
              # link prediction test
-            distance_matrix = -1*euclidean_distances(Embeddings, Embeddings)
-            roc, pr = evaluation.evaluate_ROC_from_matrix(validation_edges, validation_labels, distance_matrix)
+            adj_matrix_rec = np.dot(Embeddings, Embeddings.T)
+            roc, pr = evaluation.evaluate_ROC_from_matrix(validation_edges, validation_labels, adj_matrix_rec)
             
             # If validation accuracy is an improvement over best-known.
             if roc > best_validation_accuracy:
