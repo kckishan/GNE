@@ -167,6 +167,9 @@ class GNE(BaseEstimator, TransformerMixin):
             Embeddings      = Embeddings_out + Embeddings_in
 
              # link prediction test
+            ## If you want the embeddings for related gene to be closer to each other 
+            ## adj_matrix_rec = -1*euclidean_distances(Embeddings, Embeddings)		
+            ####################################################################################
             adj_matrix_rec = np.dot(Embeddings, Embeddings.T)
             roc, pr = evaluation.evaluate_ROC_from_matrix(validation_edges, validation_labels, adj_matrix_rec)
 
