@@ -13,3 +13,6 @@ To get better understanding of our method, following references could be helpful
 * [Deep Learning Book](http://www.deeplearningbook.org)
 * [Representation Learning on Graphs: Methods and Applications](https://arxiv.org/pdf/1709.05584.pdf)
 * [A survey on Network Embedding](https://arxiv.org/pdf/1711.08752.pdf)
+
+
+If you are interested to learn more, this [link](https://github.com/chihming/awesome-network-embedding) could be helpful.
