@@ -1,9 +1,9 @@
 # GNE: A deep learning framework for gene network inference by aggregating biological information
 This is the tensorflow implementation of the GNE as described in our paper submitted to ECCB 2018.
 
-GNE integrates gene interaction network with gene expression data to learn a more informative representations for gene network, which can be plugged into off-the-shelf machine learning methods for diverse functional inference tasks: gene function prediction, gene ontology reconstruction, and genetic interaction prediction. 
-
 ![](figures/gne.png)
+
+GNE integrates gene interaction network with gene expression data to learn a more informative representations for gene network, which can be plugged into off-the-shelf machine learning methods for diverse functional inference tasks: gene function prediction, gene ontology reconstruction, and genetic interaction prediction. 
 
 ## Architecture of GNE
 ![](figures/block_diagram.png)
@@ -15,27 +15,26 @@ Requirements
 - networkx
 - scipy
 
-
 ### Example to run demo.
 ```
 python run_GNE.py
 ```
 
-## Datasets
+## Data
+
+In order to use your own data, you have to provide
+
+- an edgelist representing the interaction network which is converted to M by M adjacency matrix, and
+- an M by E feature matrix (E is the number of experiments per gene)
+
+Have a look at the LoadData class in LoadData.py for an example. 
+
+In this example, we load interaction network data and expression data matrix for yeast. The original datasets can be found from data sources:
 
 | Dataset        | Source           | 
 | ------------- |:-------------:|
 | Interaction dataset  | [BioGRID](http://thebiogrid.org/) | 
 | Gene expression data     | [DREAM5 Challenge](http://dreamchallenges.org/project/dream-5-network-inference-challenge/)    |  
-
-In order to use your own data, you have to provide
-
-- an edgelist representing the interaction network which is converted to M by M adjacency matrix, and
-- an M by E feature matrix (E is the number of experiments per gene) -- optional
-
-Have a look at the LoadData class in LoadData.py for an example. 
-
-In this example, we load interaction network data and expression data matrix for yeast. The original datasets can be found from data sources mentioned above. 
 
 You can use M by M adjacency matrix as input by editing run_GNE.py.
 
