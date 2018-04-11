@@ -1,12 +1,25 @@
 # GNE: A deep learning framework for gene network inference by aggregating biological information
+This is the tensorflow implementation of the GNE as described in our paper submitted to ECCB 2018.
 
-## Integrates gene interaction network with gene expression data to learn informative representations for gene network.
+GNE integrates gene interaction network with gene expression data to learn a more informative representations for gene network, which can be plugged into off-the-shelf machine learning methods for diverse functional inference tasks: gene function prediction, gene ontology reconstruction, and genetic interaction prediction. 
 
 ![](figures/gne.png)
 
 ## Architecture of GNE
 ![](figures/block_diagram.png)
 
+Requirements 
+- TensorFlow (1.0 or later)
+- python3.6
+- sklearn
+- networkx
+- scipy
+
+
+### Example to run demo.
+```
+python run_GNE.py
+```
 
 ## Datasets
 
@@ -15,14 +28,23 @@
 | Interaction dataset  | [BioGRID](http://thebiogrid.org/) | 
 | Gene expression data     | [DREAM5 Challenge](http://dreamchallenges.org/project/dream-5-network-inference-challenge/)    |  
 
+In order to use your own data, you have to provide
 
-## Implementation
-Tensorflow implementation of Gene Network Embedding framework (GNE).
+- an edgelist representing the interaction network which is converted to M by M adjacency matrix, and
+- an M by E feature matrix (E is the number of experiments per gene) -- optional
 
-### Example to run the codes.
-```
-python run_GNE.py
-```
+Have a look at the LoadData class in LoadData.py for an example. 
+
+In this example, we load interaction network data and expression data matrix for yeast. The original datasets can be found from data sources mentioned above. 
+
+You can use M by M adjacency matrix as input by editing run_GNE.py.
+
+Note: the order of genes in adjacency matrix and feature matrix should be same.
+
+## Settings
+You can choose between the following settings:
+GNE: Setting value of \( \lambda \)	to 0, GNE learns from only topological properties
+GNE+: Setting value of \( \lambda \)	to 1, GNE learns from integration of topological properties and expression data
 
 ## Contact
 kk3671@rit.edu
