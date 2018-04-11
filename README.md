@@ -27,9 +27,7 @@ In order to use your own data, you have to provide
 * an edgelist representing the interaction network which is converted to M by M adjacency matrix, and
 * an M by E feature matrix (E is the number of experiments per gene)
 
-Have a look at the LoadData class in LoadData.py for an example. 
-
-In this example, we load interaction network data and expression data matrix for yeast. The original datasets can be found from data sources:
+We load interaction network data and expression data matrix for yeast in run_GNE.py as an example. The original datasets can be found from data sources:
 
 | Dataset        | Source           | 
 | ------------- |:-------------:|
