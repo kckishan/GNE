@@ -1,8 +1,6 @@
-# GNE: A deep learning framework for gene network inference by aggregating biological information
+# Gene Network Embedding (GNE)
 
 This file describes the packages required for GNE.
-
-Required packages
 * [TensorFlow](https://www.tensorflow.org/) (1.0 or later) - Open source deep learning library
 * [python3.6](https://www.python.org/) - Python interpreter
 * [sklearn](http://scikit-learn.org/stable/) - Machine learning library in python
