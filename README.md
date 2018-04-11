@@ -46,5 +46,6 @@ You can choose between the following settings:
 
 For coding, We name λ as alpha in parameters list. 
 
+For more details, visit [GNE references](GNE_details).
 ## Contact
 kk3671@rit.edu
