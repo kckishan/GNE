@@ -41,8 +41,10 @@ Note: the order of genes in adjacency matrix and feature matrix should be same.
 ## Settings
 You can choose between the following settings:
 
-* GNE: Setting value of λ to 0, GNE learns from only topological properties
-* GNE+: Setting value of λ to 1, GNE learns from integration of topological properties and expression data
+* GNE: Setting λ = 0, GNE learns from only topological properties
+* GNE+: Setting λ = 1, GNE learns from integration of topological properties and expression data
+
+For coding, We name λ as alpha in parameters list. 
 
 ## Contact
 kk3671@rit.edu
