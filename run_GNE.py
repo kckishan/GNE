@@ -7,13 +7,22 @@ from convertdata import *
 
 ################################# Define parameters to train GNE model #######################################
 parameters = {}
+# Dimension of topological structure embeddings
 parameters['id_embedding_size'] = 128
+# Dimension of expression data embeddings
 parameters['attr_embedding_size'] = 128
-parameters['alpha'] = 1
-parameters['n_neg_samples'] = 10
-parameters['epoch'] = 20
+# Dimension of final representation after transformation of concatenated topological properties and expression data representation
 parameters['representation_size'] = 128
+# Importance of gene expression relative to topological properties
+parameters['alpha'] = 1
+
+# Number of negative samples for Negative Sampling
+parameters['n_neg_samples'] = 10
+# Number of epochs to run the model
+parameters['epoch'] = 20
+# Number of sample to consider in the batch
 parameters['batch_size'] = 256
+# Learning rate
 parameters['learning_rate'] = 0.005
 
 print(parameters)
