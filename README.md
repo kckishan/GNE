@@ -1,5 +1,5 @@
 # GNE: A deep learning framework for gene network inference by aggregating biological information
-This is the tensorflow implementation of the GNE as described in our paper submitted to ECCB 2018.
+This is the tensorflow implementation of the GNE as described in our paper.
 
 ![](figures/gne.png)
 
