@@ -48,6 +48,7 @@ For coding, We name λ as alpha in parameters list.
 
 ## Supplementary Materials
 [Supplementary Table S1](https://github.com/kckishan/GNE_results/tree/master/Results/Supplementary Table S1.xlsx)
+
 [Supplementary Table S2](https://github.com/kckishan/GNE_results/tree/master/Results/Supplementary Table S2.xlsx)
 
 For more details, visit [GNE references](GNE_details.md).
