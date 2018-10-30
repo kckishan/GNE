@@ -4,7 +4,7 @@ tagline: Kishan K C, Rui Li, Feng Cui, Qi Yu, Anne R. Haake
 # (the "/" is important)
 baseurl: "/GNE"
 # arXiv ID (as in "https://arxiv.org/abs/[arXiv id]")
-arxiv: "https://www.biorxiv.org/content/early/2018/04/13/300996"
+arxiv: "300996"
 repo:  "https://github.com/kckishan/GNE"
 
 author:
