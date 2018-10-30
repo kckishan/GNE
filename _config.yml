@@ -1,5 +1,5 @@
-title: GNE: A deep learning framework for gene network inference by aggregating biological information
-tagline: Kishan K C, Rui Li, Feng Cui, Qi Yu, Anne R. Haake
+title: GNE A deep learning framework for gene network inference by aggregating biological information
+tagline: Kishan K C, Rui Li, Feng Cui, Qi Yu and Anne R. Haake
 # When building locally, put an empty string. Otherwise, put "/your-repo-name"
 # (the "/" is important)
 baseurl: "/GNE"
