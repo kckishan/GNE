@@ -1,15 +1,15 @@
-title: Paper Title
-tagline: Author, Coauthor
+title: GNE: A deep learning framework for gene network inference by aggregating biological information
+tagline: Kishan K C, Rui Li, Feng Cui, Qi Yu, Anne R. Haake
 # When building locally, put an empty string. Otherwise, put "/your-repo-name"
 # (the "/" is important)
-baseurl: "/mila-paper-webpage"
+baseurl: "/GNE"
 # arXiv ID (as in "https://arxiv.org/abs/[arXiv id]")
-arxiv: ""
-repo:  "https://github.com/mila-udem/mila-paper-webpage"
+arxiv: "https://www.biorxiv.org/content/early/2018/04/13/300996"
+repo:  "https://github.com/kckishan/GNE"
 
 author:
-  name: Contact name
-  url: "https://google.com"
+  name: Kishan KC
+  url: "http://kishankc.com.np"
 
 # Leave this as is
 markdown: kramdown
