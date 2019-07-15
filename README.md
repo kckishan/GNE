@@ -1,3 +1,5 @@
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/gne-a-deep-learning-framework-for-gene/link-prediction-on-biogrid)](https://paperswithcode.com/sota/link-prediction-on-biogrid?p=gne-a-deep-learning-framework-for-gene)
+
 # GNE: A deep learning framework for gene network inference by aggregating biological information
 This is the tensorflow implementation of the GNE as described in our paper.
 
