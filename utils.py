@@ -9,7 +9,6 @@ import csv
 from random import randint
 
 import numpy as np
-from dreamtools import D5C4
 from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import train_test_split
 import pandas as pd
