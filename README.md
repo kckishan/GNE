@@ -1,5 +1,7 @@
 # GNE: A deep learning framework for gene network inference by aggregating biological information
-This is the tensorflow implementation of the GNE as described in our paper. The code was forked initially from [here](https://github.com/lizi-git/ASNE).
+This is the TensorFlow implementation of the GNE as described in our paper. The code was forked initially from [here](https://github.com/lizi-git/ASNE).
+
+WE provide PyTorch implementation for GNE that encodes network struture only in [BionetEmbedding](https://github.com/kckishan/BioNetEmbedding). Note that this is a minimal version of this TensorFlow implementation.
 
 ![](figures/gne.png)
 
