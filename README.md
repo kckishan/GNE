@@ -55,3 +55,16 @@ For coding, We name λ as alpha in parameters list.
 For more details, visit [GNE references](GNE_details.md).
 ## Contact
 kk3671@rit.edu
+
+If you find this code useful, please cite us as:
+
+    @article{kishan2019gne,
+      title={GNE: a deep learning framework for gene network inference by aggregating biological information},
+      author={Kishan, KC and Li, Rui and Cui, Feng and Yu, Qi and Haake, Anne R},
+      journal={BMC systems biology},
+      volume={13},
+      number={2},
+      pages={38},
+      year={2019},
+      publisher={Springer}
+    }
